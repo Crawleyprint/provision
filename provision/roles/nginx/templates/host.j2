@@ -1,0 +1,21 @@
+upstream {{ item.upstream }} {
+  server unix:/run/gunicorn/{{ item.vhost }}.sock fail_timeout=10s;
+}
+
+server {
+  listen                *:80;
+  server_name           {{ item.vhost }};
+
+  access_log            /var/log/nginx/{{ item.vhost }}.access.log;
+  error_log             /var/log/nginx/{{ item.vhost }}.error.log;
+
+  location / {
+    proxy_pass          http://{{ item.upstream }};
+    proxy_read_timeout  90;
+  }
+
+  location /static {
+    alias      /home/{{ item.user }}/vhosts/mezzanine/static;
+  }
+
+}
